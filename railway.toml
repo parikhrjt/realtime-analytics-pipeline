@@ -1,0 +1,10 @@
+[build]
+buildCommand = "pip install -r requirements.txt"
+
+[deploy]
+startCommand = "sh scripts/start_api.sh"
+healthcheckPath = "/health"
+
+[env]
+PYTHONPATH = "."
+APP_ENV = "production"

@@ -8,6 +8,8 @@ A production-grade realtime product analytics pipeline that ingests product even
 
 Built as a senior data engineering portfolio project demonstrating event-driven architecture, stream processing, dimensional modeling, anomaly detection, and operational alerting.
 
+> **Live demo:** Full stack runs via Docker Compose locally. Deploy the API on [Render](#cloud-deployment) and UI on [Streamlit Cloud](#deploy-ui-on-streamlit-cloud). See the [Demo walkthrough](#demo) below.
+
 ---
 
 ## Problem Statement
@@ -44,6 +46,7 @@ This pipeline solves that by:
 | **Observability** | Structured logging (structlog), health checks |
 | **Infrastructure** | Docker Compose full stack |
 | **CI** | GitHub Actions — ruff + pytest |
+| **Deployment** | Docker Compose · Render · Railway · Streamlit Cloud |
 
 ---
 
@@ -134,6 +137,82 @@ realtime-analytics-pipeline/
 ├── requirements.txt
 ├── pyproject.toml
 └── .env.example
+```
+
+---
+
+## Demo
+
+Try the API in under 2 minutes after `docker compose up -d` (wait ~60s for events to flow).
+
+```bash
+export API_URL=http://localhost:8000
+```
+
+### Step 1 — Health check
+
+```bash
+curl -s "$API_URL/health" | python3 -m json.tool
+```
+
+### Step 2 — Recent events
+
+```bash
+curl -s "$API_URL/events?limit=5" | python3 -m json.tool
+```
+
+### Step 3 — Latest KPIs
+
+```bash
+curl -s "$API_URL/kpis?days=7" | python3 -m json.tool
+```
+
+Expected: `latest` object with `dau`, `revenue`, `conversion_rate`, `churn_rate`, `referral_performance` plus `history` arrays.
+
+### Step 4 — Filter by event type
+
+```bash
+curl -s "$API_URL/events?event_type=purchase&limit=3" | python3 -m json.tool
+```
+
+### One-liner smoke test
+
+```bash
+API_URL=http://localhost:8000 \
+  curl -sf "$API_URL/health" && \
+  curl -sf "$API_URL/kpis" && \
+  curl -sf "$API_URL/events?limit=1" && \
+  echo "✓ All endpoints OK"
+```
+
+Open http://localhost:8501 for the live dashboard with metric cards and trend charts.
+
+---
+
+## Cloud Deployment
+
+The **full streaming stack** (Redpanda + consumer + producer) is designed for Docker Compose or a VPS. For portfolio demos, deploy the **read API** to the cloud and the **UI** to Streamlit Cloud.
+
+### Deploy API on Render
+
+1. Connect repo at [render.com](https://render.com) → uses `render.yaml`
+2. Add managed **PostgreSQL** and **Redis** (or external URLs)
+3. Set `DATABASE_URL`, `REDIS_HOST`, `KAFKA_BOOTSTRAP_SERVERS` in dashboard
+4. See [`.env.cloud.example`](.env.cloud.example)
+
+### Deploy UI on Streamlit Cloud
+
+1. [share.streamlit.io](https://share.streamlit.io) → repo → main file: `streamlit_app.py`
+2. Secrets:
+
+```toml
+API_BASE_URL = "https://your-api.onrender.com"
+```
+
+### Local full stack (recommended for demos)
+
+```bash
+cp .env.example .env && docker compose up --build -d
 ```
 
 ---
@@ -302,6 +381,17 @@ See [`.env.example`](.env.example) for the full list. Key settings:
 | `REDIS_HOST` | `localhost` | Redis hostname |
 | `PRODUCER_INTERVAL_SECONDS` | `1.0` | Event generation interval |
 | `ANOMALY_DROP_THRESHOLD_PCT` | `30.0` | Alert threshold |
+
+---
+
+## Future Improvements
+
+- **dbt transformation layer** — formalize SQL models for KPI tables
+- **Exactly-once semantics** — idempotent consumer with dedup keys
+- **Schema registry** — Avro/Protobuf for event contract enforcement
+- **Grafana dashboards** — operational metrics alongside product KPIs
+- **Multi-tenant topics** — per-product event namespaces
+- **Flink/Spark streaming** — scale beyond single-consumer throughput
 
 ---
 

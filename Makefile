@@ -1,34 +1,43 @@
-.PHONY: install test lint run-api run-ui run-producer run-consumer migrate up down logs
+.PHONY: help install test lint run-api run-ui run-producer run-consumer migrate docker-up docker-down up down logs
+
+help:
+	@echo "Realtime Analytics Pipeline"
+	@echo "  install        Create venv and install deps"
+	@echo "  test           Run pytest"
+	@echo "  docker-up      Start full Docker stack"
+	@echo "  docker-down    Stop Docker stack"
+	@echo "  run-api        Start FastAPI locally"
+	@echo "  run-ui         Start Streamlit locally"
 
 install:
 	python3.11 -m venv .venv
 	.venv/bin/pip install -r requirements.txt
 
 test:
-	.venv/bin/pytest tests/ -v
+	PYTHONPATH=. .venv/bin/pytest tests/ -v
 
 lint:
 	.venv/bin/ruff check app tests scripts
 
 run-api:
-	.venv/bin/uvicorn app.api.main:app --reload --host 0.0.0.0 --port 8000
+	PYTHONPATH=. .venv/bin/uvicorn app.api.main:app --reload --host 0.0.0.0 --port 8000
 
 run-ui:
-	.venv/bin/streamlit run streamlit_app.py
+	PYTHONPATH=. API_BASE_URL=http://localhost:8000 .venv/bin/streamlit run streamlit_app.py
 
 run-producer:
-	.venv/bin/python scripts/run_producer.py
+	PYTHONPATH=. .venv/bin/python scripts/run_producer.py
 
 run-consumer:
-	.venv/bin/python scripts/run_consumer.py
+	PYTHONPATH=. .venv/bin/python scripts/run_consumer.py
 
 migrate:
-	.venv/bin/python scripts/migrate.py
+	PYTHONPATH=. .venv/bin/python scripts/migrate.py
 
-up:
+docker-up up:
 	docker compose up --build -d
 
-down:
+docker-down down:
 	docker compose down -v
 
 logs:

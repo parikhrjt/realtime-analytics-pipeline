@@ -25,4 +25,6 @@ jobs:
         run: ruff check app tests scripts
 
       - name: Run tests
+        env:
+          PYTHONPATH: .
         run: pytest tests/ -v --cov=app --cov-report=term-missing

@@ -1,0 +1,22 @@
+# API-only deploy — full Redpanda stack requires Docker Compose locally or a VPS.
+# Pair with Streamlit Cloud for the dashboard.
+
+services:
+  - type: web
+    name: realtime-analytics-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: sh scripts/start_api.sh
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+      - key: PYTHONPATH
+        value: .
+      - key: APP_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_HOST
+        sync: false

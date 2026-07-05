@@ -29,18 +29,18 @@ class Settings(BaseSettings):
     streamlit_port: int = 8501
 
     # Redpanda / Kafka
-    kafka_bootstrap_servers: str = "localhost:9092"
+    kafka_bootstrap_servers: str = "localhost:19092"
     kafka_topic: str = "product-events"
     kafka_consumer_group: str = "analytics-consumer"
     kafka_auto_offset_reset: str = "earliest"
 
     # PostgreSQL
     postgres_host: str = "localhost"
-    postgres_port: int = 5432
+    postgres_port: int = 5433
     postgres_user: str = "analytics"
     postgres_password: str = "analytics"
     postgres_db: str = "analytics_pipeline"
-    database_url: str = "postgresql://analytics:analytics@localhost:5432/analytics_pipeline"
+    database_url: str = "postgresql://analytics:analytics@localhost:5433/analytics_pipeline"
 
     # Redis
     redis_host: str = "localhost"
